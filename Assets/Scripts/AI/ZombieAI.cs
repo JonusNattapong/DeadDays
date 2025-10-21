@@ -639,6 +639,15 @@ public class ZombieAI : MonoBehaviour
         // Invoke damage taken event so other systems (UI, ML, analytics) can react
         OnDamageTaken?.Invoke(damage, damageSource);
 
+        // Notify attached SmartZombieAgent (if present) so the agent receives a penalty for taking damage.
+        // The penalty is scaled by normalized damage (damage / maxHealth) so it's proportional.
+        SmartZombieAgent agent = GetComponent<SmartZombieAgent>();
+        if (agent != null)
+        {
+            float normalizedDamage = maxHealth > 0f ? damage / maxHealth : damage / 100f;
+            agent.AddReward(agent.damagePenalty * normalizedDamage);
+        }
+
         // Visual feedback
         StartCoroutine(DamageFlash());
 
